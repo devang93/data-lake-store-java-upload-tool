@@ -1,0 +1,19 @@
+{
+  "name": "main",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "grunt": "^0.4.5",
+    "grunt-msbuild": "^0.3.4",
+    "grunt-zipup": "^0.1.8"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "node-xml-lite": "0.0.7"
+  }
+}
