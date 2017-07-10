@@ -6,9 +6,10 @@ var globalGrunt = require('..\\build\\grunt\\gruntfile.Main.js');
 var config = {
 		solutions:
 		{
-			sln: "",
+			// The proj file is not required, but using a value here since this would be required for archiva upload
+			sln: "InfoGridjavautility.proj",
 			version: "1.0.0",
-			//If the packagefolder is left balnk by default it takes the Release folder as default
+			//If the packagefolder is left blank by default it takes the Release folder as default
 			packagefolder:"\\target",
 			tests:{
 				 //Added test template sample

@@ -1,0 +1,16 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"> 
+    <ItemGroup>
+        <OutputPath Include="$(OutputDir)" />
+    </ItemGroup>
+     
+    <!-- Custom target invoked in child project to copy the shell files -->
+	<Target Name="Build">
+		<Message Text="Deleting from @(OutputPath)" />
+		<RemoveDir Directories="$(OutputPath)" />
+    <ItemGroup>
+	  <ManifestFile Include="manifest.json" />
+    </ItemGroup>
+	<Copy SourceFiles="@(ManifestFile)" DestinationFiles="$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)" />
+  </Target>
+         
+</Project>
