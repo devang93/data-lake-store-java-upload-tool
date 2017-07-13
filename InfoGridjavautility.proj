@@ -9,8 +9,8 @@
 	  <ManifestFile Include="manifest.json" />
 	  <JarFiles Include="target\**\*.jar" />  
     </ItemGroup>
-	<Copy SourceFiles="@(ManifestFile)" DestinationFiles="$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)" />
-	<Copy SourceFiles="@(JarFiles)" DestinationFiles="$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)" />
+	<Copy SourceFiles="@(ManifestFile)" DestinationFiles="$(OutputDir)\%(RecursiveDir)%(Filename)%(Extension)" />
+	<Copy SourceFiles="@(JarFiles)" DestinationFiles="$(OutputDir)\%(RecursiveDir)%(Filename)%(Extension)" />
   </Target>
          
 </Project>
