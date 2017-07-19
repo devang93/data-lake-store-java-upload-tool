@@ -1,1 +1,6 @@
-dummy file till development team brings in the data
+"where ?":[
+         { "filename" : "infogridjavautility_2.12-1.2.jar",
+		   "filepath": "/scala-2.12/",
+		   "targetPath": "where is the scala jar to be installed?"
+		 }
+]
