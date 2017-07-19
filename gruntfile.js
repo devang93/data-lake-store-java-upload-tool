@@ -19,7 +19,7 @@ var config = {
 				//If the packagefolder.path is left blank by default it takes the Release folder as default.
 				path 		:"\\releasejavautility",
 				// Name of the package can be specified by the user here.
-				packagename	:"igjavautility"
+				packagename	:"InfoGridjavautility"
 			}
 		}
 		
