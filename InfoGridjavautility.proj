@@ -1,6 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"> 
     <ItemGroup>
         <OutputPath Include="$(OutputDir)" />
+        <ProjectToBuild Include=".\db-cp\build.sbt"/> 
     </ItemGroup>
      
     <!-- Custom target invoked in child project to copy the shell files -->
