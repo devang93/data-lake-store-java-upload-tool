@@ -1,16 +1,17 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"> 
     <ItemGroup>
         <OutputPath Include="$(OutputDir)" />
+        <ProjectToBuild Include=".\db-cp\build.sbt"/> 
     </ItemGroup>
      
     <!-- Custom target invoked in child project to copy the shell files -->
 	<Target Name="Build">
     <ItemGroup>
 	  <ManifestFile Include="manifest.json" />
-	  <JarFiles Include="target\**\*.jar" />  
+	  <JarFiles Include="db-cp\target\*.jar" />  
     </ItemGroup>
 	<Copy SourceFiles="@(ManifestFile)" DestinationFiles="$(OutputDir)\InfoGridjavautility\%(RecursiveDir)%(Filename)%(Extension)" />
-	<Copy SourceFiles="@(JarFiles)" DestinationFiles="$(OutputDir)\InfoGridjavautility\%(RecursiveDir)%(Filename)%(Extension)" />
+	<Copy SourceFiles="@(JarFiles)" DestinationFiles="$(OutputDir)\InfoGridjavautility\db-cp\%(RecursiveDir)%(Filename)%(Extension)" />
   </Target>
          
 </Project>

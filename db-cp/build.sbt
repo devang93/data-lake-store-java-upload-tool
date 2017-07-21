@@ -19,6 +19,8 @@ scalaVersion in ThisBuild := "2.12.1"
 
 crossScalaVersions in ThisBuild := Seq("2.12.1")
 
+crossPaths in ThisBuild := false
+
 libraryDependencies in ThisBuild ++= Seq(
   scala_parser_combinators,
   slf4j_api,
