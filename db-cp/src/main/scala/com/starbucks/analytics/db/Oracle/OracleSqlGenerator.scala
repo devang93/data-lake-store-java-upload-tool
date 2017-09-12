@@ -15,12 +15,8 @@ object OracleSqlGenerator extends SqlGenerator {
   ): String = {
     val builder: StringBuilder = new StringBuilder
     builder ++=
-      s"""SELECT T.OWNER, T.TABLE_NAME, P.PARTITION_NAME, SP.SUBPARTITION_NAME FROM
+      s"""SELECT T.OWNER, T.TABLE_NAME, NULL AS PARTITION_NAME, NULL AS SUBPARTITION_NAME FROM
          | ALL_TABLES T
-         | LEFT OUTER JOIN ALL_TAB_PARTITIONS P ON
-         | T.TABLE_NAME = P.TABLE_NAME AND T.OWNER = P.TABLE_OWNER
-         | LEFT OUTER JOIN ALL_TAB_SUBPARTITIONS SP ON
-         | P.TABLE_NAME = SP.TABLE_NAME and P.PARTITION_NAME = SP.PARTITION_NAME AND P.TABLE_OWNER = SP.TABLE_OWNER
          | WHERE T.OWNER = '${owner.toUpperCase}' AND
          | T.TABLE_NAME IN
          | (${tables map (table => s"'${table.toUpperCase}'") mkString ", "})
