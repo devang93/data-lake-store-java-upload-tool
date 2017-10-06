@@ -1,6 +1,6 @@
 {
 "airflow":[
-         { "filename" : "db-cp-assembly.jar",
+         { "filename" : "db-cp-assembly-1.2.jar",
 		   "filepath": "/db-cp/",
 		   "targetPath": "/InfoGrid/utility/jar/"
 		 }
