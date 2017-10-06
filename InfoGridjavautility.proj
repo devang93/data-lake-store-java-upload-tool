@@ -12,5 +12,6 @@
     </ItemGroup>
 	<Copy SourceFiles="@(ManifestFile)" DestinationFiles="$(OutputDir)\%(RecursiveDir)%(Filename)%(Extension)" />
 	<Copy SourceFiles="@(JarFiles)" DestinationFiles="$(OutputDir)\db-cp\%(RecursiveDir)%(Filename)%(Extension)" />
-  </Target>        
+  </Target>
+  
 </Project>
