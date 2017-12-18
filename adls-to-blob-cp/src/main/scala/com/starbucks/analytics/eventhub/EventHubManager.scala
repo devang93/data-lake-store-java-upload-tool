@@ -1,5 +1,8 @@
 package com.starbucks.analytics.eventhub
 
+import java.security.PublicKey
+import javax.crypto.Cipher
+
 import com.microsoft.azure.eventhubs.{ EventData, EventHubClient }
 import com.microsoft.azure.servicebus.ConnectionStringBuilder
 import com.typesafe.scalalogging.Logger
@@ -78,4 +81,52 @@ object EventHubManager {
       fn
     )
   }
+
+  /**
+   * New method added to encrypt the events with RSA before pushing to eventhub.
+   * @param connectionInfo
+   * @param events
+   * @param cipher
+   * @return
+   */
+  def publishEventsEncrypted(
+    connectionInfo: EventHubConnectionInfo,
+    events:         List[Event],
+    cipher:         Cipher
+  ): Try[Boolean] = {
+    def fn(eventHubClient: EventHubClient): Boolean = {
+      var success = false
+      breakable {
+        events.foreach(event => {
+          logger.debug(s"Publishing event ${event.toJson}" +
+            s" to event hub ${connectionInfo.eventHubNamespaceName}/" +
+            s" ${connectionInfo.eventHubName}")
+
+          val eventData = new EventData(cipher.doFinal(event.toJson.getBytes("UTF-8")))
+          println(s"Encrypted data: ${cipher.doFinal(event.toJson.getBytes("UTF-8"))}")
+          println(s"Total length after the encryption is : ${eventData.getBytes.length}")
+          logger.debug(s"Published encrypted event ${new String(eventData.getBytes())}")
+          try {
+            eventHubClient.sendSync(eventData)
+            success = true
+          } catch {
+            case e: Exception => {
+              logger.error(s"Publishing event ${event.toJson}" +
+                s" to event hub ${connectionInfo.eventHubNamespaceName}/" +
+                s" ${connectionInfo.eventHubName} failed with exception" +
+                s" $e")
+              success = false
+              break()
+            }
+          }
+        })
+      }
+      success
+    }
+    withAzureEventHubClient[Boolean](
+      connectionInfo,
+      fn
+    )
+  }
+
 }

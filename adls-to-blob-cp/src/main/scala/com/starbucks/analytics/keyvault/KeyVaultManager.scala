@@ -3,7 +3,7 @@ package com.starbucks.analytics.keyvault
 import java.util.concurrent.Executors
 
 import com.microsoft.azure.keyvault.core.IKey
-import com.microsoft.azure.keyvault.{KeyVaultClient, KeyVaultClientImpl, KeyVaultClientService, KeyVaultConfiguration}
+import com.microsoft.azure.keyvault.{ KeyVaultClient, KeyVaultClientImpl, KeyVaultClientService, KeyVaultConfiguration }
 import com.microsoft.azure.keyvault.extensions.KeyVaultKeyResolver
 import com.typesafe.scalalogging.Logger
 import org.apache.http.impl.client.HttpClientBuilder
@@ -39,14 +39,14 @@ object KeyVaultManager {
 
   def getKey(
     keyVaultConnectionInfo: KeyVaultConnectionInfo,
-    resourceUri:                String
+    resourceUri:            String
   ): Try[IKey] = {
-      def fn(kvClient: KeyVaultClient): IKey = {
-        val keyVaultResolver: KeyVaultKeyResolver = new KeyVaultKeyResolver(
-          kvClient
-        )
-        keyVaultResolver.resolveKeyAsync(resourceUri).get()
-      }
+    def fn(kvClient: KeyVaultClient): IKey = {
+      val keyVaultResolver: KeyVaultKeyResolver = new KeyVaultKeyResolver(
+        kvClient
+      )
+      keyVaultResolver.resolveKeyAsync(resourceUri).get()
+    }
     withAzureKeyVaultClient(
       keyVaultConnectionInfo,
       fn

@@ -7,7 +7,7 @@ import com.starbucks.analytics.s3.S3ConnectionInfo
 /**
   * Factory class to generate instances of Event Processor Class with constructor parameters.
   */
-class EventProcessorFactory(s3ConnectionInfo: S3ConnectionInfo, keyVaultConnectionInfo: KeyVaultConnectionInfo, keyVaultResourceUri: String, desiredParallelism: Int) extends IEventProcessorFactory[EventProcessor]{
+class EventProcessorFactory(s3ConnectionInfo: S3ConnectionInfo, keyVaultConnectionInfo: KeyVaultConnectionInfo, keyVaultResourceUri: String, desiredParallelism: Int, vendorPubKey: String) extends IEventProcessorFactory[EventProcessor]{
 
   /**
     * Method to create Event Processor instances.
@@ -15,6 +15,6 @@ class EventProcessorFactory(s3ConnectionInfo: S3ConnectionInfo, keyVaultConnecti
     * @return
     */
   override def createEventProcessor(context: PartitionContext): EventProcessor = {
-    new EventProcessor(s3ConnectionInfo.awsAccessKeyID, s3ConnectionInfo.awsSecretAccessKey, s3ConnectionInfo.s3BucketName, s3ConnectionInfo.s3FolderName, keyVaultConnectionInfo, keyVaultResourceUri ,desiredParallelism)
+    new EventProcessor(s3ConnectionInfo.awsAccessKeyID, s3ConnectionInfo.awsSecretAccessKey, s3ConnectionInfo.s3BucketName, s3ConnectionInfo.s3FolderName, keyVaultConnectionInfo, keyVaultResourceUri, vendorPubKey, desiredParallelism)
   }
 }

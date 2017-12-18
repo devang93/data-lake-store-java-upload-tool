@@ -1,7 +1,10 @@
 package com.starbucks.analytics.eventhub
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, FileOutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileOutputStream}
 import java.lang
+import java.nio.file.Files
+import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
 
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.s3.AmazonS3Client
@@ -25,12 +28,18 @@ import scala.util.{Failure, Success}
 /**
   * Event Processor to process all the events received from Event Hub.
   */
-class EventProcessor(awsAccessKeyId: String, awsSecretKey: String, s3BucketName: String, s3FolderName: String, keyVaultConnectionInfo: KeyVaultConnectionInfo, keyVaultResourceUri: String, desiredParallelism: Int) extends IEventProcessor{
+class EventProcessor(awsAccessKeyId: String, awsSecretKey: String, s3BucketName: String, s3FolderName: String,
+                     keyVaultConnectionInfo: KeyVaultConnectionInfo, keyVaultResourceUri: String, vendorPubKey: String, desiredParallelism: Int) extends IEventProcessor{
 
   private val logger = Logger("EventProcessor")
   private var checkpointBatchingCount = 0
   private val aWSCredentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretKey)
   private val s3Client = new AmazonS3Client(aWSCredentials)
+  private val cipher = Cipher.getInstance("AES")
+  cipher.init(Cipher.DECRYPT_MODE, {
+    val keyBytes = Files.readAllBytes(new File(vendorPubKey).toPath)
+    new SecretKeySpec(keyBytes, "AES")
+  })
 
   def toEvent(eventString: String) = new Gson().fromJson(eventString, classOf[Event])
 
@@ -85,7 +94,9 @@ class EventProcessor(awsAccessKeyId: String, awsSecretKey: String, s3BucketName:
       for (message: EventData <- messagesList) {
         logger.info(s"(Partition: ${context.getPartitionId}, offset: ${message.getSystemProperties.getOffset}," +
           s"SeqNum: ${message.getSystemProperties.getSequenceNumber}) : ${new String(message.getBytes, "UTF-8")}")
-        val msgString = new String(message.getBytes, "UTF-8")
+//        val msgString = new String(message.getBytes, "UTF-8")
+        val msgString = new String( cipher.doFinal(message.getBytes), "UTF-8")
+        logger.info(s"Received & Decrypted message: ${msgString} ")
         if (msgString.contains("uri") && msgString.contains("sharedAccessSignatureToken")) {
           val event: Event = toEvent(msgString)
           eventsList += event

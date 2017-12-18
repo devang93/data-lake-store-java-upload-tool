@@ -3,9 +3,9 @@ package com.starbucks.analytics.blob
 import java.util
 
 import com.microsoft.azure.storage.blob._
-import com.microsoft.azure.storage.{CloudStorageAccount, OperationContext}
+import com.microsoft.azure.storage.{ CloudStorageAccount, OperationContext }
 import com.typesafe.scalalogging.Logger
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.{ DateTime, DateTimeZone }
 
 import scala.util.Try
 

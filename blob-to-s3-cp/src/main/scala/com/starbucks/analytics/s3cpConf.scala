@@ -26,6 +26,7 @@ class s3cpConf(arguments: Seq[String]) extends ScallopConf(arguments) {
        |  --eventHubStorageAccountKey xx
        |  --eventProcessorStorageContainer xx
        |  --keyVaultResourceUri xx
+       |  --vendorPubKey xx
        |  --awsAccessKeyID xx
        |  --awsSecretAccessKey xx
        |  --s3BucketName xx
@@ -111,6 +112,12 @@ class s3cpConf(arguments: Seq[String]) extends ScallopConf(arguments) {
     descr = "Key Vault resource uri",
     required = true
   )
+  val vendorPubKey = opt[String](
+    name = "vendorPubKey",
+    noshort = true,
+    descr = "Vendor Public Key Filepath",
+    required = true
+  )
   val awsAccessKeyID = opt[String](
     name = "awsAccessKeyID",
     noshort = false,
@@ -150,7 +157,7 @@ class s3cpConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   }
 
   dependsOnAll(eventHubNamespaceName, List(spnClientId, spnClientKey, eventHubName, eventHubSASKey, eventHubSASKeyName, eventHubStorageAccountKey,
-  eventHubStorageAccountName, keyVaultResourceUri, awsAccessKeyID, awsSecretAccessKey, s3BucketName, s3FolderName))
+  eventHubStorageAccountName, keyVaultResourceUri, awsAccessKeyID, awsSecretAccessKey, s3BucketName, s3FolderName, vendorPubKey))
   verify()
 
   private def getApplicationName: String = new java.io.File(classOf[App]

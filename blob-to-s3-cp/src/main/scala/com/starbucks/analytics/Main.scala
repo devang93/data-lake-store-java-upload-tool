@@ -61,7 +61,7 @@ object Main {
         val options = new EventProcessorOptions
         options.setExceptionNotification(new EventHubErrorNotificationHandler)
         try{
-          eventProcessorHost.registerEventProcessorFactory(new EventProcessorFactory(s3ConnectionInfo, keyVaultConnectionInfo, conf.keyVaultResourceUri() ,conf.desiredParallelism()), options)
+          eventProcessorHost.registerEventProcessorFactory(new EventProcessorFactory(s3ConnectionInfo, keyVaultConnectionInfo, conf.keyVaultResourceUri() ,conf.desiredParallelism(), conf.vendorPubKey()), options)
         }catch {
           case e: ExecutionException => {
             logger.error(e.getCause.toString)
