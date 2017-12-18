@@ -2,25 +2,22 @@ package com.starbucks.analytics
 
 import java.io.File
 import java.nio.file.Files
-import java.security.{ KeyFactory, KeyPairGenerator, PublicKey }
-import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 import com.microsoft.azure.datalake.store.ADLFileInputStream
-import com.microsoft.azure.keyvault.extensions.RsaKey
 import com.microsoft.azure.storage.OperationContext
-import com.microsoft.azure.storage.blob.{ BlobEncryptionPolicy, BlobRequestOptions, CloudBlockBlob }
-import com.starbucks.analytics.adls.{ ADLSConnectionInfo, ADLSManager }
-import com.starbucks.analytics.blob.{ BlobConnectionInfo, BlobManager }
-import com.starbucks.analytics.eventhub.{ Event, EventHubConnectionInfo, EventHubManager }
-import com.starbucks.analytics.keyvault.{ KeyVaultConnectionInfo, KeyVaultManager }
+import com.microsoft.azure.storage.blob.{BlobEncryptionPolicy, BlobRequestOptions, CloudBlockBlob}
+import com.starbucks.analytics.adls.{ADLSConnectionInfo, ADLSManager}
+import com.starbucks.analytics.blob.{BlobConnectionInfo, BlobManager}
+import com.starbucks.analytics.eventhub.{Event, EventHubConnectionInfo, EventHubManager}
+import com.starbucks.analytics.keyvault.{KeyVaultConnectionInfo, KeyVaultManager}
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.collection.parallel.mutable.ParSeq
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 /**
  * Entry point for the application
@@ -28,6 +25,7 @@ import scala.util.{ Failure, Success, Try }
 object Main {
   val logger = Logger("Main")
   var successMap = new mutable.LinkedHashMap[String, (Boolean, Option[(String, String)])]()
+  var renamesuccessMap = new mutable.LinkedHashMap[String, Boolean]()
 
   /**
    * Entry point
@@ -138,12 +136,61 @@ object Main {
           else
             logger.error("Failed to upload one or more events")
       }
+
+      logger.info("Renaming files with .DONE extension.")
+      listOfFiles.foreach(file => {
+        val renameresult: (Boolean) = rename(
+          adlsConnectionInfo,
+          file
+        )
+        renamesuccessMap += (file -> renameresult)
+      })
+      if (renamesuccessMap.exists((x) => !x._2)) {
+        logger.error(s"Failed renaming the following files:" +
+          s" ${renamesuccessMap.filter((x) => !x._2).mkString("\n")}")
+        System.exit(-1)
+      } else {
+        logger.info(s"Succeeded renaming the files: " +
+          s" ${renamesuccessMap.keys.mkString("\n")}")
+      }
+
     }
     logger.info(s"Completed execution")
     System.exit(0)
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Rename the file in Azure Data Lake Store
+   * @param adlsConnectionInfo Azure Data Lake Store Connection Information
+   * @param sourceFile File to rename
+   * @return
+   */
+  def rename(
+    adlsConnectionInfo: ADLSConnectionInfo,
+    sourceFile:         String
+  ): (Boolean) = {
+    var success = false
+    ADLSManager.renameFile(
+      adlsConnectionInfo,
+      sourceFile,
+      ".DONE"
+    ) match {
+        case Success(value) => {
+          logger.info(s"Successfully Renamed the file $sourceFile")
+          success = true
+        }
+        case Failure(f) =>
+          logger.error(s"failure in renaming $sourceFile" +
+            s" in Azure Data Lake Store ${adlsConnectionInfo.accountFQDN}" +
+            s" failed with exception $f")
+      }
+    (success)
+  }
+
+  /**
+>>>>>>> master
    * Uploads the file from Azure Data Lake Store to Azure Blob Storage
    *
    * @param adlsConnectionInfo Azure Data Lake Store Connection Information
@@ -271,7 +318,7 @@ object Main {
       sourceFolder = sourceFolder.dropRight(1)
     }
 
-    if (conf.sourceFile.isSupplied) {
+    if (conf.sourceFile.isSupplied && !conf.sourceFile().endsWith(".DONE")) {
       listOfFiles += {
         if (conf.sourceFile().startsWith("/")) {
           s"$sourceFolder${conf.sourceFile()}"
