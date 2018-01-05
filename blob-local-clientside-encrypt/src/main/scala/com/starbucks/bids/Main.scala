@@ -93,6 +93,7 @@ object Main {
     }
 
     // TODO: Download the files from destination container.
+    DecryptBlobFiles.decryptBlobContentsRecursively(conf.blobStoreSASUri(), conf.encryptionKeyPath(), conf.blobStoreDestContainerName())
     // Given only Blob Storage URI to folder and SASToken with read only permission.
     // Assuming that the encrypt/decrypt key has already been shared.
 //    val sasUri = conf.blobStoreSASUri()
