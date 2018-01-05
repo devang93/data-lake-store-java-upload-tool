@@ -7,17 +7,17 @@ import javax.crypto.spec.SecretKeySpec
 
 import com.microsoft.azure.datalake.store.ADLFileInputStream
 import com.microsoft.azure.storage.OperationContext
-import com.microsoft.azure.storage.blob.{BlobEncryptionPolicy, BlobRequestOptions, CloudBlockBlob}
-import com.starbucks.analytics.adls.{ADLSConnectionInfo, ADLSManager}
-import com.starbucks.analytics.blob.{BlobConnectionInfo, BlobManager}
-import com.starbucks.analytics.eventhub.{Event, EventHubConnectionInfo, EventHubManager}
-import com.starbucks.analytics.keyvault.{KeyVaultConnectionInfo, KeyVaultManager}
+import com.microsoft.azure.storage.blob.{ BlobEncryptionPolicy, BlobRequestOptions, CloudBlockBlob }
+import com.starbucks.analytics.adls.{ ADLSConnectionInfo, ADLSManager }
+import com.starbucks.analytics.blob.{ BlobConnectionInfo, BlobManager }
+import com.starbucks.analytics.eventhub.{ Event, EventHubConnectionInfo, EventHubManager }
+import com.starbucks.analytics.keyvault.{ KeyVaultConnectionInfo, KeyVaultManager }
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.collection.parallel.mutable.ParSeq
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 /**
  * Entry point for the application
@@ -160,8 +160,6 @@ object Main {
   }
 
   /**
-<<<<<<< HEAD
-=======
    * Rename the file in Azure Data Lake Store
    * @param adlsConnectionInfo Azure Data Lake Store Connection Information
    * @param sourceFile File to rename
@@ -190,7 +188,6 @@ object Main {
   }
 
   /**
->>>>>>> master
    * Uploads the file from Azure Data Lake Store to Azure Blob Storage
    *
    * @param adlsConnectionInfo Azure Data Lake Store Connection Information
