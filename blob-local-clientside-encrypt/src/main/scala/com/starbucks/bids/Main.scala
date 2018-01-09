@@ -93,7 +93,7 @@ object Main {
     }
 
     // TODO: Download the files from destination container.
-    DecryptBlobFiles.decryptBlobContentsRecursively(conf.blobStoreSASUri(), conf.encryptionKeyPath(), conf.blobStoreDestContainerName())
+//    DecryptBlobFiles.decryptBlobContentsRecursively(conf.blobStoreSASUri(), conf.encryptionKeyPath(), conf.blobStoreDestContainerName())
     // Given only Blob Storage URI to folder and SASToken with read only permission.
     // Assuming that the encrypt/decrypt key has already been shared.
 //    val sasUri = conf.blobStoreSASUri()
@@ -108,7 +108,7 @@ object Main {
 //      blobRequestOptions.setConcurrentRequestCount(10)
 //      blobRequestOptions.setEncryptionPolicy(blobDecryptionPolicy)
 //      val operationContext = new OperationContext()
-//      val blobFix = "/vendorexportonetime/data/sb/green/outgoing/AmperityLyticsAndRedPointExport/ICTData/Header.txt"
+//      val blobFix = "/sb/green/outgoing/AmperityLyticsAndRedPointExport/ICTData/Header.txt"
 //      val blobName = blob.getUri.getPath.drop(1).split("\\/").filter(word => !(word.contains(conf.blobStoreDestContainerName()))).mkString("/")+blobFix
 //      println(blob.getUri.getPath.drop(1).split("\\/").filter(word => !(word.contains(conf.blobStoreDestContainerName()))).mkString("/"))
 //      println(blobName)
@@ -116,5 +116,6 @@ object Main {
 //      println(s"PRINTING THE FILE : ${blobName}")
 //      println(blobReference.downloadText("UTF-8", null, blobRequestOptions, operationContext))
 //    })
+    System.exit(0)
   }
 }

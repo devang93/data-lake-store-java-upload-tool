@@ -15,6 +15,7 @@ import scala.collection.mutable.ListBuffer
   */
 object DecryptBlobFiles {
 
+  // Test code to download and print just one file.
   def decryptBlobFilesToConsole(blobSasUri: String, encryptionKeyPath: String, blobStoreContainerName: String): Unit = {
 
     val cloudBlobContainer = new CloudBlobContainer(new URI(blobSasUri))
@@ -44,6 +45,7 @@ object DecryptBlobFiles {
     val decryptKey = new SymmetricKey("vendor", decryptKeyBytes)
 
     val blobNames = getBlobNamesRecursively(cloudBlobContainer, blobStoreContainerName)
+    println(blobNames)
     blobNames.foreach(blob => {
       val blobEncryptionPolicy = new BlobEncryptionPolicy(decryptKey, null)
       val blobRequestOptions = new BlobRequestOptions()
@@ -60,8 +62,10 @@ object DecryptBlobFiles {
     var blobNames = ListBuffer[String]()
 
     cloudBlobContainer.listBlobs().forEach(blobItem => {
+      println(s"For ${blobItem.getUri.getPath}")
+      val name = blobItem.getUri.getPath.drop(1).split("\\/").filter(word => !(word.equals(blobStoreContainerName))).mkString("/")
       if(blobItem.isInstanceOf[CloudBlobDirectory]){
-        val blobName = getBlobNamesFromDirectory(cloudBlobContainer.getDirectoryReference(blobItem.getUri.getPath), blobStoreContainerName )
+        val blobName = getBlobNamesFromDirectory(cloudBlobContainer.getDirectoryReference(name), blobStoreContainerName )
         blobNames = blobNames ++ blobName
       } else {
         val blobName = blobItem.getUri.getPath.drop(1).split("\\/").filter(word => !(word.equals(blobStoreContainerName))).mkString("/")
@@ -75,8 +79,9 @@ object DecryptBlobFiles {
     var blobNames = ListBuffer[String]()
 
     cloudBlobDirectory.listBlobs().forEach(blobItem => {
+      val name = blobItem.getUri.getPath.drop(1).split("\\/").filter(word => !(word.equals(blobStoreContainerName))).mkString("/")
       if(blobItem.isInstanceOf[CloudBlobDirectory]){
-        val blobName = getBlobNamesFromDirectory(cloudBlobDirectory.getDirectoryReference(blobItem.getUri.getPath), blobStoreContainerName )
+        val blobName = getBlobNamesFromDirectory(cloudBlobDirectory.getContainer.getDirectoryReference(name), blobStoreContainerName )
         blobNames = blobNames ++ blobName
       } else {
         val blobName = blobItem.getUri.getPath.drop(1).split("\\/").filter(word => !(word.equals(blobStoreContainerName))).mkString("/")
