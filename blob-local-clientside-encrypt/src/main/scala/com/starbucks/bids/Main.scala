@@ -67,20 +67,26 @@ object Main {
                 blobReference.downloadAttributes()
                 // Now we can download the blob to an ByteArrayInputStream.
                 val blobOutputStream = new BlobUploadOutputStream()
-                blobReference.download(blobOutputStream, null, blobRequestOptions, null)
+                val testStream = blobReference.openInputStream(null, blobRequestOptions, operationContext)
+//                blobReference.download(blobOutputStream, null, blobRequestOptions, null)
                 // Now create another blob item in the destination container/directory and then upload the previous InputArrayStream.
                 // TODO: Get output destination blob reference.
                 BlobManager.getBlockBlobReference(blobConnectionInfo, conf.blobStoreDestContainerName(), file) match {
-                  case Failure(exception) => println(exception)
+                  case Failure(exception) => println(exception); Nil
                   case Success(outBlobReference) => {
                     val outBlobEncryptionPolicy = new BlobEncryptionPolicy(localKey, null)
                     val outBlobRequestOptions = new BlobRequestOptions()
                     outBlobRequestOptions.setConcurrentRequestCount(100)
                     outBlobRequestOptions.setEncryptionPolicy(outBlobEncryptionPolicy)
-                    outBlobReference.upload(blobOutputStream.toInputStream, -1, null, outBlobRequestOptions, operationContext)
+                    outBlobReference.setStreamWriteSizeInBytes(32000000)
+                    val outStream = outBlobReference.openOutputStream(null, outBlobRequestOptions, operationContext)
+//                    outBlobReference.upload(testStream, -1, null, outBlobRequestOptions, operationContext)
+//                    outBlobReference.upload(blobOutputStream.toInputStream, -1, null, outBlobRequestOptions, operationContext)
+                    blobReference.download(outStream, null, blobRequestOptions, operationContext)
                   }
 
                 }
+
               }
             }
           }
@@ -108,7 +114,7 @@ object Main {
 //      blobRequestOptions.setConcurrentRequestCount(10)
 //      blobRequestOptions.setEncryptionPolicy(blobDecryptionPolicy)
 //      val operationContext = new OperationContext()
-//      val blobFix = "/sb/green/outgoing/AmperityLyticsAndRedPointExport/ICTData/Header.txt"
+//      val blobFix = "/sb/green/outgoing/AmperityLyticsAndRedPointExport/POSData/Headerfile.txt"
 //      val blobName = blob.getUri.getPath.drop(1).split("\\/").filter(word => !(word.contains(conf.blobStoreDestContainerName()))).mkString("/")+blobFix
 //      println(blob.getUri.getPath.drop(1).split("\\/").filter(word => !(word.contains(conf.blobStoreDestContainerName()))).mkString("/"))
 //      println(blobName)
