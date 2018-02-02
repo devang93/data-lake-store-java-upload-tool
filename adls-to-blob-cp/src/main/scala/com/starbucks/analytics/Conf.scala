@@ -24,8 +24,9 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
        |  --blobStoreContainerName xx
        |  --blobStoreRootFolder xx
        |  --tokenExpirationInMinutes 00
+       |  --useKeyVaultKey xx
        |  --keyVaultResourceUri xx
-       |  --vendorPubKey xx
+       |  --clientKeyPath xx
        |  --eventHubNamespaceName xx
        |  --eventHubName xx
        |  --eventHubSASKeyName xx
@@ -103,13 +104,20 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
     descr = "Please specify the token expiration time in minutes",
     required = true
   )
+  val useKeyVaultKey = opt[Boolean](
+    name = "useKeyVaultKey",
+    noshort = true,
+    descr = "Specify whether to use supplied RSA key for file encryption. By default:false",
+    required = false,
+    default = Some(false)
+  )
   val keyVaultResourceUri = opt[String](
     name = "keyVaultResourceUri",
     noshort = true,
     descr = "Key Vault resource uri",
-    required = true
+    required = false
   )
-  val vendorPubKey = opt[String](
+  val clientKeyPath = opt[String](
     name = "vendorPubKey",
     noshort = true,
     descr = "Vendor Public Key Filepath",
@@ -163,6 +171,7 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   }
 
   dependsOnAny(adlsFQDN, List(sourceFolder, sourceFile))
+  dependsOnAll(useKeyVaultKey, List(keyVaultResourceUri))
   verify()
 
   private def getApplicationName: String = new java.io.File(classOf[App]
