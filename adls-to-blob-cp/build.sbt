@@ -7,7 +7,7 @@ name in ThisBuild := "adls-to-blob-cp"
 
 organization in ThisBuild := "com.starbucks.analytics"
 
-version in ThisBuild := "0.3"
+version in ThisBuild := "0.0.4"
 
 licenses in ThisBuild += ("Apache License, Version 2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 

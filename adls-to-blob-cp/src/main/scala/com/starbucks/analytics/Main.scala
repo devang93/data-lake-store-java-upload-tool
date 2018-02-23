@@ -6,6 +6,8 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 import com.microsoft.azure.datalake.store.ADLFileInputStream
+import com.microsoft.azure.keyvault.core.IKey
+import com.microsoft.azure.keyvault.extensions.{ RsaKey, SymmetricKey }
 import com.microsoft.azure.storage.OperationContext
 import com.microsoft.azure.storage.blob.{ BlobEncryptionPolicy, BlobRequestOptions, CloudBlockBlob }
 import com.starbucks.analytics.adls.{ ADLSConnectionInfo, ADLSManager }
@@ -55,7 +57,7 @@ object Main {
 
     // TODO : Get public key from the file and set eventhub encryption.
     val eventHubSecretKeySpec: SecretKeySpec = {
-      val keyBytes = Files.readAllBytes(new File(conf.vendorPubKey()).toPath)
+      val keyBytes = Files.readAllBytes(new File(conf.clientKeyPath()).toPath)
       new SecretKeySpec(keyBytes, "AES")
     }
     val cipher = Cipher.getInstance("AES")
@@ -98,6 +100,17 @@ object Main {
           file
         )
         successMap += (file -> result)
+
+        /*
+         TODO:Rename the file once uploaded with .DONE extension.
+         */
+        val renameResult = rename(adlsConnectionInfo, file)
+        renameResult match {
+          case true  => logger.info(s"Succeed in renaming file: ${file} to ${file}.DONE")
+          case false => logger.info(s"Failed in renaming file: ${file} to ${file}.DONE")
+        }
+        renamesuccessMap += (file -> renameResult)
+
       })
 
     // Validate the results
@@ -117,10 +130,7 @@ object Main {
           uri = x._2._2.get._1,
           sharedAccessSignatureToken = x._2._2.get._2
         )).toList
-      //      EventHubManager.publishEvents(
-      //        eventHubConnectionInfo,
-      //        eventsToPublish
-      //      ) match {
+
       EventHubManager.publishEventsEncrypted(
         eventHubConnectionInfo,
         eventsToPublish,
@@ -137,14 +147,14 @@ object Main {
             logger.error("Failed to upload one or more events")
       }
 
-      logger.info("Renaming files with .DONE extension.")
-      listOfFiles.foreach(file => {
-        val renameresult: (Boolean) = rename(
-          adlsConnectionInfo,
-          file
-        )
-        renamesuccessMap += (file -> renameresult)
-      })
+      //      logger.info("Renaming files with .DONE extension.")
+      //      listOfFiles.foreach(file => {
+      //        val renameresult: (Boolean) = rename(
+      //          adlsConnectionInfo,
+      //          file
+      //        )
+      //        renamesuccessMap += (file -> renameresult)
+      //      })
       if (renamesuccessMap.exists((x) => !x._2)) {
         logger.error(s"Failed renaming the following files:" +
           s" ${renamesuccessMap.filter((x) => !x._2).mkString("\n")}")
@@ -220,11 +230,24 @@ object Main {
     else
       blobFileName = s"$blobFileName${sourceFile.drop(1)}"
 
-    // Get the key vault key
-    val keyVaultKey = KeyVaultManager.getKey(
-      keyVaultConnectionInfo,
-      conf.keyVaultResourceUri()
-    )
+    // TODO: Add support for either KeyVault or User-supplied key encryption.
+    var encryptionKey: Option[IKey] = None
+    if (conf.useKeyVaultKey()) {
+      // Get the key vault key
+      encryptionKey = KeyVaultManager.getKey(
+        keyVaultConnectionInfo,
+        conf.keyVaultResourceUri()
+      ) match {
+          case Success(key) => Some(key)
+          case Failure(exception) =>
+            logger.error(s"Failure to get a key from KeyVaultUri:${conf.keyVaultResourceUri()} Exception: ${exception}")
+            System.exit(-1)
+            None
+        }
+    } else {
+      val keyBytes = Files.readAllBytes(new File(conf.clientKeyPath()).toPath)
+      encryptionKey = Some(new SymmetricKey("vendor", keyBytes))
+    }
 
     BlobManager.getBlockBlobReference(
       blobConnectionInfo,
@@ -240,7 +263,7 @@ object Main {
         }
         case Success(blockBlobReference: CloudBlockBlob) => {
           def fn(stream: ADLFileInputStream) = {
-            val blobEncryptionPolicy = new BlobEncryptionPolicy(keyVaultKey.get, null)
+            val blobEncryptionPolicy = new BlobEncryptionPolicy(encryptionKey.get, null)
             val blobRequestOptions = new BlobRequestOptions()
             val operationContext = new OperationContext()
             blobRequestOptions.setConcurrentRequestCount(100)

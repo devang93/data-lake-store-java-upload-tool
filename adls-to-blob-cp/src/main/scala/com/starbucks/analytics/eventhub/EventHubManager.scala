@@ -101,10 +101,7 @@ object EventHubManager {
           logger.debug(s"Publishing event ${event.toJson}" +
             s" to event hub ${connectionInfo.eventHubNamespaceName}/" +
             s" ${connectionInfo.eventHubName}")
-
           val eventData = new EventData(cipher.doFinal(event.toJson.getBytes("UTF-8")))
-          println(s"Encrypted data: ${cipher.doFinal(event.toJson.getBytes("UTF-8"))}")
-          println(s"Total length after the encryption is : ${eventData.getBytes.length}")
           logger.debug(s"Published encrypted event ${new String(eventData.getBytes())}")
           try {
             eventHubClient.sendSync(eventData)
