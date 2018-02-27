@@ -15,7 +15,21 @@ import scala.collection.parallel.{ ForkJoinTaskSupport, ParMap }
  *
  * @param file Absolute path of the file containing upload instruction
  */
-case class Config(file: File = new File("."))
+case class Config(
+  file:                  File   = new File("."),
+  username:              String = null,
+  password:              String = null,
+  hostPort:              String = null,
+  databaseName:          String = null,
+  schemaOwner:           String = null,
+  adlsTarget:            String = null,
+  adlsRootDir:           String = null,
+  srcLogicalDatabase:    String = null,
+  authEndPoint:          String = null,
+  targetLogicalDatabase: String = null,
+  srcDomainName:         String = null,
+  srcSubDomainName:      String = null,
+  targetEnv:             String = null)
 /**
  * Entry point for the application
  * Orchestrator
@@ -31,6 +45,17 @@ object App extends App {
   if (config.isEmpty) {
     System.exit(-1)
   }
+
+  // Add the command line arguments to system properties.
+  val oracle_jdbc = "jdbc:oracle:thin:@" + config.get.hostPort + "/" + config.get.databaseName
+  sys.props.put("oracle_jdbc", oracle_jdbc)
+  val configMap = config.get.getClass.getDeclaredFields.map(_.getName).zip(config.get.productIterator.to)
+  configMap.foreach(pair => {
+    sys.props.put(pair._1, pair._2.toString)
+  })
+
+  rootLogger.info("Registered and Available Environment Parameters:")
+  rootLogger.info(sys.props.toList.toString)
 
   logStartupMessage(rootLogger, getApplicationName, config.get)
 
@@ -161,6 +186,71 @@ object App extends App {
           else failure(s"The file ${f.getAbsolutePath} should exist."))
         .action { (x, c) => c.copy(file = x) }
         .text("File containing the uploader")
+      opt[String]('d', "srcDomainName")
+        .valueName("<src domain name>")
+        .required()
+        .action((x, c) => c.copy(srcDomainName = x))
+        .text("Oracle source domain name")
+      opt[String]('s', "srcSubDomainName")
+        .valueName("<src subdomain name>")
+        .required()
+        .action((x, c) => c.copy(srcSubDomainName = x))
+        .text("Oracle source subdomain name")
+      opt[String]('e', "targetEnv")
+        .valueName("ADLS target environment")
+        .required()
+        .action((x, c) => c.copy(targetEnv = x))
+        .text("ADLS target environment")
+      opt[String]('u', "username")
+        .valueName("oracle username")
+        .required()
+        .action((x, c) => c.copy(username = x))
+        .text("Oracle Username to connect")
+      opt[String]('p', "password")
+        .valueName("oracle password")
+        .required()
+        .action((x, c) => c.copy(password = x))
+        .text("Oracle Username password")
+      opt[String]('h', "hostPort")
+        .valueName("oracle machine host:port")
+        .required()
+        .action((x, c) => c.copy(hostPort = x))
+        .text("Oracle Machine Host:Port")
+      opt[String]('b', "databaseName")
+        .valueName("oracle database name")
+        .required()
+        .action((x, c) => c.copy(databaseName = x))
+        .text("Oracle Database Name")
+      opt[String]('a', "schemaOwner")
+        .valueName("oracle database schema owner")
+        .required()
+        .action((x, c) => c.copy(schemaOwner = x))
+        .text("Oracle database Schema Owner")
+      opt[String]('c', "srcLogicalDatabase")
+        .valueName("oracle logical database name")
+        .required()
+        .action((x, c) => c.copy(srcLogicalDatabase = x))
+        .text("Oracle Logical Database Name")
+      opt[String]('o', "authEndPoint")
+        .valueName("Azure SPN auth endpoint")
+        .required()
+        .action((x, c) => c.copy(authEndPoint = x))
+        .text("Azure SPN Authentication End Point")
+      opt[String]('t', "targetLogicalDatabase")
+        .valueName("ADLS target logical database")
+        .required()
+        .action((x, c) => c.copy(targetLogicalDatabase = x))
+        .text("ADLS Target Logical Database Name")
+      opt[String]('r', "adlsRootDir")
+        .valueName("ADLS Root Directory")
+        .required()
+        .action((x, c) => c.copy(adlsRootDir = x))
+        .text("ADLS Data Storage Root Directory")
+      opt[String]('j', "adlsTarget")
+        .valueName("ADLS Target Name")
+        .required()
+        .action((x, c) => c.copy(adlsTarget = x))
+        .text("ADLS Data Storage Target")
     }
 
     // Evaluate

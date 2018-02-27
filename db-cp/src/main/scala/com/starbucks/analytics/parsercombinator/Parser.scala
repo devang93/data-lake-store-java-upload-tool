@@ -87,6 +87,7 @@ object Parser extends RegexParsers {
    * @return Result of lexing
    */
   def parse(reader: Reader): Either[UploaderParserError, (DBConnectionInfo, ADLSConnectionInfo, UploaderOptionsInfo, Map[Option[(String, List[String])], Option[String]])] = {
+    val config = Map[String, String]()
     val parsed = parseAll(fileBlock, reader)
     parsed match {
       case NoSuccess(msg, next) => Left(
@@ -256,9 +257,24 @@ object Parser extends RegexParsers {
     }
   }
 
+  // New sqlToken with environment variable passed in.
+  def sqlNewToken: Parser[SQL] = {
+    "^\\(SELECT .*\\)".r ^^ { str =>
+      val content = str.substring(1, str.length - 1)
+      var parsedOutput = new String(content)
+      val envReg = "~[a-zA-Z0-9\\_]*".r
+      val finds = envReg.findAllIn(content)
+      finds.foreach(variable => {
+        val value = sys.props.getOrElse(variable.substring(1), "")
+        parsedOutput = parsedOutput.toString().replaceAll(variable, value)
+      })
+      SQL(parsedOutput)
+    }
+  }
+
   def declaration: Parser[(String, Token)] = {
     variableToken ~ assignmentToken ~
-      (interpolationToken | sqlToken) ^^ {
+      (interpolationToken | sqlNewToken) ^^ {
         case x ~ _ ~ z => (x.str, z)
       }
   }

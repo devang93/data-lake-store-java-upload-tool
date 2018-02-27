@@ -56,13 +56,25 @@ object InterpolationParser extends RegexParsers {
     }
   }
 
+  //  // Added to support datapipes
+  private def environmentToken: Parser[ENVIRONMENT_VARIABLE] = {
+    "^~[a-zA-Z0-9_]*".r ^^ { str =>
+      val content = str.substring(1)
+      ENVIRONMENT_VARIABLE(content)
+    }
+  }
+
   // Combinator that brings it all together
   private def block: Parser[String] = {
-    rep1(literalToken | variableToken) ^^ { listOfTokens =>
+    rep1(literalToken | variableToken | environmentToken) ^^ { listOfTokens =>
       val builder = new StringBuilder
       listOfTokens.foreach {
         case LITERAL(lit) =>
           builder ++= lit
+        case ENVIRONMENT_VARIABLE(v) =>
+          println("From the Interpolation parser: " + v)
+          val value = sys.props.getOrElse(v, "")
+          builder ++= value
         case VARIABLE(v) =>
           if (declarationMap.contains(v)) {
             declarationMap(v) match {
