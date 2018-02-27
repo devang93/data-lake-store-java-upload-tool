@@ -72,7 +72,6 @@ object InterpolationParser extends RegexParsers {
         case LITERAL(lit) =>
           builder ++= lit
         case ENVIRONMENT_VARIABLE(v) =>
-          println("From the Interpolation parser: " + v)
           val value = sys.props.getOrElse(v, "")
           builder ++= value
         case VARIABLE(v) =>
