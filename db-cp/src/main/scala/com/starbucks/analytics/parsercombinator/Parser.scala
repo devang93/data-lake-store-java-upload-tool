@@ -130,6 +130,14 @@ object Parser extends RegexParsers {
     }
   }
 
+  private def refactoredEnvToken: Parser[IDENTIFIER] = {
+    "~[a-zA-Z0-9_]*".r ^^ { str =>
+      val content = str.substring(1)
+      val value = sys.props.getOrElse(content, "xxx")
+      IDENTIFIER(value)
+    }
+  }
+
   private def functionToken: Parser[FUNCTION] = {
     "^`[a-zA-Z0-9\\-_,\\/\\.\\(\\)'\\s]*".r ^^ { str => FUNCTION(str.substring(1)) }
   }
@@ -395,11 +403,11 @@ object Parser extends RegexParsers {
   private def sqlGenerator = usingToken ~ identifierToken
 
   // combinators for parsing select tokens
-  private def owner = ownerToken ~ identifierToken
-  private def table = tableToken ~ identifierToken
+  private def owner = ownerToken ~ (refactoredEnvToken | identifierToken)
+  private def table = tableToken ~ (refactoredEnvToken | identifierToken)
   private def partition = partitionsToken ~> variableToken
   private def subPartition = subPartitionsToken ~> variableToken
-  private def predicate = predicateToken ~ identifierToken ~ opt(functionToken) ~
+  private def predicate = predicateToken ~ (refactoredEnvToken | identifierToken) ~ opt(functionToken) ~
     operatorToken ~ opt(quoteToken) ~ variableToken ~ opt(quoteToken)
   private def select = {
     selectToken ~> owner ~ table ~ opt(partition) ~

@@ -73,7 +73,14 @@ object InterpolationParser extends RegexParsers {
           builder ++= lit
         case ENVIRONMENT_VARIABLE(v) =>
           val value = sys.props.getOrElse(v, "")
-          builder ++= value
+          if (value.contains("$")) {
+            val result = InterpolationParser.parse(value, dbConnectionInfo, declarationMap)
+            if (result.isRight) {
+              builder ++= result.right.get
+            }
+          } else {
+            builder ++= value
+          }
         case VARIABLE(v) =>
           if (declarationMap.contains(v)) {
             declarationMap(v) match {

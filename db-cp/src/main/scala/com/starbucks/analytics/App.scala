@@ -16,20 +16,21 @@ import scala.collection.parallel.{ ForkJoinTaskSupport, ParMap }
  * @param file Absolute path of the file containing upload instruction
  */
 case class Config(
-  file:                  File   = new File("."),
-  username:              String = null,
-  password:              String = null,
-  hostPort:              String = null,
-  databaseName:          String = null,
-  schemaOwner:           String = null,
-  adlsTarget:            String = null,
-  adlsRootDir:           String = null,
-  srcLogicalDatabase:    String = null,
-  authEndPoint:          String = null,
-  targetLogicalDatabase: String = null,
-  srcDomainName:         String = null,
-  srcSubDomainName:      String = null,
-  targetEnv:             String = null)
+  file:                File   = new File("."),
+  username:            String = null,
+  password:            String = null,
+  hostPort:            String = null,
+  databaseName:        String = null,
+  schemaOwner:         String = null,
+  adlsStoreName:       String = null,
+  adlsRootDir:         String = null,
+  logicalDatabase:     String = null,
+  predicateColumnName: String = null,
+  authEndPoint:        String = null,
+  adlsSubDir:          String = null,
+  srcDomainName:       String = null,
+  srcSubDomainName:    String = null,
+  targetEnv:           String = null)
 /**
  * Entry point for the application
  * Orchestrator
@@ -53,9 +54,6 @@ object App extends App {
   configMap.foreach(pair => {
     sys.props.put(pair._1, pair._2.toString)
   })
-
-  rootLogger.info("Registered and Available Environment Parameters:")
-  rootLogger.info(sys.props.toList.toString)
 
   logStartupMessage(rootLogger, getApplicationName, config.get)
 
@@ -226,30 +224,35 @@ object App extends App {
         .required()
         .action((x, c) => c.copy(schemaOwner = x))
         .text("Oracle database Schema Owner")
-      opt[String]('c', "srcLogicalDatabase")
-        .valueName("oracle logical database name")
+      opt[String]('c', "logicalDatabase")
+        .valueName("oracle logical database/table name")
         .required()
-        .action((x, c) => c.copy(srcLogicalDatabase = x))
+        .action((x, c) => c.copy(logicalDatabase = x))
+        .text("Oracle Logical Database Name")
+      opt[String]('z', "predicateColumnName")
+        .valueName("oracle table predicate column to filter")
+        .required()
+        .action((x, c) => c.copy(predicateColumnName = x))
         .text("Oracle Logical Database Name")
       opt[String]('o', "authEndPoint")
         .valueName("Azure SPN auth endpoint")
         .required()
         .action((x, c) => c.copy(authEndPoint = x))
         .text("Azure SPN Authentication End Point")
-      opt[String]('t', "targetLogicalDatabase")
+      opt[String]('t', "adlsSubDir")
         .valueName("ADLS target logical database")
         .required()
-        .action((x, c) => c.copy(targetLogicalDatabase = x))
+        .action((x, c) => c.copy(adlsSubDir = x))
         .text("ADLS Target Logical Database Name")
       opt[String]('r', "adlsRootDir")
         .valueName("ADLS Root Directory")
         .required()
         .action((x, c) => c.copy(adlsRootDir = x))
         .text("ADLS Data Storage Root Directory")
-      opt[String]('j', "adlsTarget")
-        .valueName("ADLS Target Name")
+      opt[String]('j', "adlsStoreName")
+        .valueName("ADLS Target Store Name")
         .required()
-        .action((x, c) => c.copy(adlsTarget = x))
+        .action((x, c) => c.copy(adlsStoreName = x))
         .text("ADLS Data Storage Target")
     }
 
